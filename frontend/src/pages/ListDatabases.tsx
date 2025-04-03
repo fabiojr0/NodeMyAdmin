@@ -3,9 +3,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Tabs from "../components/Tabs";
 import useDatabase from "../hooks/useDatabase";
 import { TrashSimple } from "@phosphor-icons/react";
+import { Link } from "react-router-dom";
 
 function ListDatabases() {
-  const tabs = [{ tab: "databases", name: "Banco de Dados" }];
+  const tabs = [{ tab: "/databases", name: "Banco de Dados" }];
   const { getDatabases, createDatabase } = useDatabase();
   const queryClient = useQueryClient();
 
@@ -40,13 +41,13 @@ function ListDatabases() {
             Criar Banco de Dados
           </div>
           <input
-            className="bg-white border border-zinc-400 rounded p-1"
+            className="bg-white border border-zinc-400 rounded p-2 w-72"
             placeholder="Nome do banco de dados"
             value={dbName}
             onChange={(e) => setDbName(e.target.value)}
           />
           <button
-            className="bg-emerald-600 text-white py-1 px-4 rounded ml-2 border border-zinc-400 cursor-pointer hover:bg-emerald-700 transition-colors active:scale-95"
+            className="bg-[#4D9942] text-white py-2 px-6 rounded ml-2 border border-zinc-400 cursor-pointer hover:bg-emerald-600 transition-colors active:scale-95"
             onClick={() => mutation.mutate(dbName)}
           >
             Criar
@@ -70,7 +71,7 @@ function ListDatabases() {
                 <thead>
                   <tr className="bg-gray-100 text-left text-gray-700">
                     <th className="border px-4 py-2 w-auto">#</th>
-                    <th className="border px-4 py-2 w-auto whitespace-nowrap">Banco de dados</th>
+                    <th className="border px-4 py-2 w-auto min-w-96 whitespace-nowrap">Banco de dados</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -79,7 +80,9 @@ function ListDatabases() {
                       <td className="border px-4 py-2">
                         <input type="checkbox" />
                       </td>
-                      <td className="border px-4 py-2 whitespace-nowrap">{db}</td>
+                      <td className="border px-4 py-2 whitespace-nowrap">
+                        <Link to={"/database/" + db}>{db}</Link>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

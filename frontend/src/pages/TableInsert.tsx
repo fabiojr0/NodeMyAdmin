@@ -131,7 +131,7 @@ function TableInsert() {
                   <td className="border p-2">{col.Field}</td>
                   <td className="border p-2 text-gray-600">{col.Type}</td>
                   <td className="border p-2">
-                    <select className="border p-1 rounded w-full" disabled={col.Extra === "auto_increment"}>
+                    <select className="border p-1 rounded w-full disabled:border disabled:border-zinc-200 disabled:text-zinc-200" disabled={col.Extra === "auto_increment"}>
                       <option value="">Nenhuma</option>
                       <option value="UUID()">UUID()</option>
                       <option value="NOW()">NOW()</option>
@@ -151,7 +151,7 @@ function TableInsert() {
                       value={formData[col.Field] || ""}
                       onChange={handleChange}
                       disabled={nullValues[col.Field] || col.Extra === "auto_increment"}
-                      className="p-1 border rounded w-full"
+                      className="p-1 border rounded w-full disabled:border disabled:border-zinc-200"
                     />
                   </td>
                 </tr>
@@ -159,7 +159,7 @@ function TableInsert() {
             </tbody>
           </table>
 
-          <button type="submit" className="bg-blue-500 text-white p-2 rounded mt-4 w-full">
+          <button type="submit" className="bg-blue-500 text-white py-2 px-6 rounded mt-4 w-auto">
             Executar
           </button>
         </form>

@@ -1,6 +1,5 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
-import Home from "./pages/Home";
 import ListDatabases from "./pages/ListDatabases";
 import Database from "./pages/Database";
 import Table from "./pages/Table";
@@ -12,7 +11,7 @@ function App() {
     <div className="flex flex-row">
       <Sidebar />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Navigate to="/databases" replace />} />
         <Route path="/databases" element={<ListDatabases />} />
         <Route path="/database/:dbName" element={<Database />} />
         <Route path="/database/:dbName/table/:tableName" element={<Table />} />

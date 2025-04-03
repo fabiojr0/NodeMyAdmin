@@ -21,7 +21,7 @@ function SidebarItem({ dbName }: { dbName: string }) {
   });
 
   return (
-    <li className="flex flex-col  h-fit">
+    <li className="flex flex-col w-64 h-fit">
       <div className="flex items-center gap-1">
         <button onClick={toggleOpen} className="">
           <div className="bg-slate-300 p-1 rounded">
@@ -47,7 +47,7 @@ function SidebarItem({ dbName }: { dbName: string }) {
             return (
               <li key={table} className="flex items-center gap-1">
                 <Rows size={12} />
-                <Link to={"/database/" + dbName + "/table/" + table}>{table}</Link>
+                <Link className="line-clamp-1" to={"/database/" + dbName + "/table/" + table}>{table}</Link>
               </li>
             );
           })}

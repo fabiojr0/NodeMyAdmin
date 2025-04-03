@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
@@ -51,6 +52,7 @@ function Database() {
         if (i !== index) col.primaryKey = false;
       });
     }
+    // @ts-expect-error
     newColumns[index][field] = value;
     setColumns(newColumns);
   };
@@ -155,7 +157,7 @@ function Database() {
             + Adicionar Coluna
           </button>
           <button
-            className="mt-4 bg-emerald-600 text-white py-1 px-4 rounded ml-2 border border-zinc-400 cursor-pointer hover:bg-emerald-700 transition-colors active:scale-95"
+            className="mt-4 bg-[#4D9942] text-white py-1 px-4 rounded ml-2 border border-zinc-400 cursor-pointer hover:bg-emerald-600 transition-colors active:scale-95"
             onClick={() => mutation.mutate()}
             disabled={!tableName || columns.some((col) => !col.name)}
           >
@@ -191,7 +193,7 @@ function Database() {
                         <input type="checkbox" />
                       </td>
                       <td className="border px-4 py-2 whitespace-nowrap">{table}</td>
-                      <td className="border px-4 py-2 whitespace-nowrap flex items-center gap-2">
+                      <td className="px-4 py-2 whitespace-nowrap flex items-center gap-2">
                         <Link
                           to={`/database/${dbName}/table/${table}`}
                           className="text-blue-600 hover:underline mr-2 flex items-center gap-1"
@@ -201,7 +203,7 @@ function Database() {
                         </Link>
                         <Link
                           to={`/database/${dbName}/table/${table}/insert`}
-                          className="text-green-600 hover:underline mr-2 flex items-center gap-1"
+                          className="text-[#4D9942] hover:underline mr-2 flex items-center gap-1"
                         >
                           <Plus size={20} />
                           Inserir

@@ -15,8 +15,9 @@ function Sidebar() {
 
   return (
     <div className="bg-slate-100 w-fit h-screen py-4 pl-2 pr-6 flex flex-col gap-6">
-      <Link to={"/"}>
-        <h1 className="font-semibold text-2xl text-emerald-600 italic">
+      <Link to={"/"} className="flex items-center gap-2">
+        <img src="/node.png" className="w-6 h-6"/>
+        <h1 className="font-semibold text-2xl text-[#4D9942] italic">
           Node<span className="text-orange-400">MyAdmin</span>
         </h1>
       </Link>
