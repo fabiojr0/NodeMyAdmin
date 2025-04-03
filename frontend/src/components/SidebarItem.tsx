@@ -14,9 +14,9 @@ function SidebarItem({ dbName }: { dbName: string }) {
   const { getTables } = useTable();
 
   const { data: tables } = useQuery({
-    queryKey: ["tables"],
+    queryKey: ["tables", dbName],
     queryFn: () => getTables(dbName ?? ""),
-    staleTime: 0,
+    staleTime: 1000 * 60 * 5,
     enabled: !!dbName,
   });
 
@@ -47,7 +47,7 @@ function SidebarItem({ dbName }: { dbName: string }) {
             return (
               <li key={table} className="flex items-center gap-1">
                 <Rows size={12} />
-                {table}
+                <Link to={"/database/" + dbName + "/table/" + table}>{table}</Link>
               </li>
             );
           })}

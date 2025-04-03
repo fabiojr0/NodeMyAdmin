@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Tabs from "../components/Tabs";
 import useTable from "../hooks/useTable";
-import { TrashSimple } from "@phosphor-icons/react";
+import { Plus, Table, TrashSimple, TreeStructure } from "@phosphor-icons/react";
 
 function Database() {
   const { dbName } = useParams();
@@ -12,11 +12,11 @@ function Database() {
 
   const queryClient = useQueryClient();
 
-  // Estado para armazenar o nome da tabela e colunas
   const [tableName, setTableName] = useState("");
-  const [columns, setColumns] = useState([{ name: "", type: "VARCHAR(255)" }]);
+  const [columns, setColumns] = useState([
+    { name: "", type: "VARCHAR(255)", primaryKey: false, foreignKey: { table: "", column: "" } },
+  ]);
 
-  // Query para buscar tabelas
   const { data: tables } = useQuery({
     queryKey: ["tables", dbName],
     queryFn: () => getTables(dbName ?? ""),
@@ -24,29 +24,33 @@ function Database() {
     enabled: !!dbName,
   });
 
-  // Mutation para criar tabela
   const mutation = useMutation({
     mutationFn: () => createTable(dbName ?? "", tableName.replaceAll(" ", "_"), columns),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tables", dbName] });
       setTableName("");
-      setColumns([{ name: "", type: "VARCHAR(255)" }]);
+      setColumns([{ name: "", type: "VARCHAR(255)", primaryKey: false, foreignKey: { table: "", column: "" } }]);
     },
   });
 
-  // Adicionar nova coluna
   const addColumn = () => {
-    setColumns([...columns, { name: "", type: "VARCHAR(255)" }]);
+    setColumns([
+      ...columns,
+      { name: "", type: "VARCHAR(255)", primaryKey: false, foreignKey: { table: "", column: "" } },
+    ]);
   };
 
-  // Remover coluna
   const removeColumn = (index: number) => {
     setColumns(columns.filter((_, i) => i !== index));
   };
 
-  // Atualizar coluna (nome ou tipo)
-  const updateColumn = (index: number, field: "name" | "type", value: string) => {
+  const updateColumn = (index: number, field: unknown, value: unknown) => {
     const newColumns = [...columns];
+    if (field === "primaryKey" && value) {
+      newColumns.forEach((col, i) => {
+        if (i !== index) col.primaryKey = false;
+      });
+    }
     newColumns[index][field] = value;
     setColumns(newColumns);
   };
@@ -57,7 +61,6 @@ function Database() {
       <div className="p-4 flex flex-col gap-12 w-full">
         <h2 className="text-2xl">Banco de Dados: {dbName}</h2>
 
-        {/* Criar tabela */}
         <div className="bg-zinc-200 w-full p-8 border border-zinc-400 rounded relative">
           <div className="absolute -top-6 left-4 bg-white py-2 px-4 rounded border border-zinc-400">Criar Tabela</div>
           <input
@@ -67,12 +70,14 @@ function Database() {
             onChange={(e) => setTableName(e.target.value)}
           />
 
-          {/* Campos para definir colunas */}
           <table className="mt-4 w-full border border-zinc-400 bg-white">
             <thead>
               <tr className="bg-gray-100 text-left text-gray-700">
-                <th className="border px-4 py-2">Nome da Coluna</th>
+                <th className="border px-4 py-2">Nome</th>
                 <th className="border px-4 py-2">Tipo</th>
+                <th className="border px-4 py-2">PK</th>
+                <th className="border px-4 py-2">FK (Tabela)</th>
+                <th className="border px-4 py-2">FK (Coluna)</th>
                 <th className="border px-4 py-2"></th>
               </tr>
             </thead>
@@ -99,7 +104,38 @@ function Database() {
                       <option value="TEXT">TEXT</option>
                       <option value="BOOLEAN">BOOLEAN</option>
                       <option value="DATE">DATE</option>
+                      <option value="INT AUTO_INCREMENT">ID (AUTO_INCREMENT)</option>
                     </select>
+                  </td>
+                  <td className="border px-4 py-2 text-center">
+                    <input
+                      type="checkbox"
+                      checked={col.primaryKey}
+                      onChange={(e) => updateColumn(index, "primaryKey", e.target.checked)}
+                    />
+                  </td>
+                  <td className="border px-4 py-2">
+                    <select
+                      className="w-full p-1 border border-zinc-400 rounded"
+                      value={col.foreignKey.table}
+                      onChange={(e) => updateColumn(index, "foreignKey", { ...col.foreignKey, table: e.target.value })}
+                    >
+                      <option value="">Nenhuma</option>
+                      {tables?.map((table) => (
+                        <option key={table} value={table}>
+                          {table}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="border px-4 py-2">
+                    <input
+                      className="w-full p-1 border border-zinc-400 rounded"
+                      type="text"
+                      placeholder="Nome da coluna"
+                      value={col.foreignKey.column}
+                      onChange={(e) => updateColumn(index, "foreignKey", { ...col.foreignKey, column: e.target.value })}
+                    />
                   </td>
                   <td className="border px-4 py-2 text-center">
                     {columns.length > 1 && (
@@ -112,15 +148,12 @@ function Database() {
               ))}
             </tbody>
           </table>
-
-          {/* Botões de ação */}
           <button
-            className="mt-4 bg-orange-400 text-white py-1 px-4 rounded border border-zinc-400 hover:bg-orange-600 transition-colors active:scale-95"
+            className="mt-4 bg-orange-400 text-white py-1 px-4 rounded border border-zinc-400"
             onClick={addColumn}
           >
             + Adicionar Coluna
           </button>
-
           <button
             className="mt-4 bg-emerald-600 text-white py-1 px-4 rounded ml-2 border border-zinc-400 cursor-pointer hover:bg-emerald-700 transition-colors active:scale-95"
             onClick={() => mutation.mutate()}
@@ -130,7 +163,6 @@ function Database() {
           </button>
         </div>
 
-        {/* Lista de tabelas existentes */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2 border border-zinc-400 bg-white rounded w-fit">
             <div className="border-r border-zinc-400 p-2 flex items-center gap-2">
@@ -149,6 +181,7 @@ function Database() {
                   <tr className="bg-gray-100 text-left text-gray-700">
                     <th className="border px-4 py-2 w-auto">#</th>
                     <th className="border px-4 py-2 w-auto whitespace-nowrap">Tabela</th>
+                    <th className="border px-4 py-2 w-auto">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -158,6 +191,29 @@ function Database() {
                         <input type="checkbox" />
                       </td>
                       <td className="border px-4 py-2 whitespace-nowrap">{table}</td>
+                      <td className="border px-4 py-2 whitespace-nowrap flex items-center gap-2">
+                        <Link
+                          to={`/database/${dbName}/table/${table}`}
+                          className="text-blue-600 hover:underline mr-2 flex items-center gap-1"
+                        >
+                          <Table size={20} />
+                          Visualizar
+                        </Link>
+                        <Link
+                          to={`/database/${dbName}/table/${table}/insert`}
+                          className="text-green-600 hover:underline mr-2 flex items-center gap-1"
+                        >
+                          <Plus size={20} />
+                          Inserir
+                        </Link>
+                        <Link
+                          to={`/database/${dbName}/table/${table}/structure`}
+                          className="text-purple-600 hover:underline flex items-center gap-1"
+                        >
+                          <TreeStructure size={20} />
+                          Estrutura
+                        </Link>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

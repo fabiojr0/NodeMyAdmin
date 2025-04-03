@@ -23,7 +23,7 @@ function Sidebar() {
 
       <ul className="flex flex-col gap-2">
         <li className="flex items-center gap-1">
-          <Link to="/" className="flex items-center gap-1">
+          <Link to="/databases" className="flex items-center gap-1">
             <div className="bg-slate-300 p-1 rounded">
               <Plus size={12} weight="bold" />
             </div>

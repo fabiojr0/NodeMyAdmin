@@ -1,14 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 function Tabs({ tabs }: { tabs: { tab: string; name: string }[] }) {
-  const activeTab = window.location.pathname || "home";
+  const location = useLocation(); // Usa React Router para pegar a URL atual
 
   return (
     <ul className="flex items-center">
       {tabs.map((tab) => {
+        const isActive = location.pathname === tab.tab; // Comparação direta correta
+
         return (
-          <li key={tab.name} className={`${activeTab === tab.tab ? "bg-white" : "bg-zinc-200"} shadow`}>
-            <Link to={`/${tab.tab.toLowerCase()}`} className="p-2 text-zinc-950">
+          <li key={tab.name} className={`${isActive ? "bg-white" : "bg-zinc-200"} shadow py-2 px-6 `}>
+            <Link to={tab.tab} className="text-zinc-950">
               {tab.name}
             </Link>
           </li>

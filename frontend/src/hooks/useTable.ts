@@ -1,6 +1,7 @@
 import api from "../setup/api";
 
 const useTable = () => {
+    // Busca todas as tabelas de um banco
     const getTables = async (dbName: string) => {
         try {
             const response = await api.get(`/show-tables?dbName=${dbName}`);
@@ -13,7 +14,6 @@ const useTable = () => {
 
             if (!tableKey) throw new Error("Formato inesperado na resposta da API");
 
-            // Extrai e retorna um array de strings usando flatMap
             return data.flatMap((db: Record<string, string>) => db[tableKey]) as string[];
         } catch (error) {
             console.error("Erro ao buscar tabelas:", error);
@@ -21,26 +21,73 @@ const useTable = () => {
         }
     };
 
-
-    const createTable = async (dbName: string, tableName: string, columns: { name: string, type: string }[]) => {
+    // Cria uma tabela
+    const createTable = async (dbName: string, tableName: string, columns: { name: string, type: string, primaryKey: boolean, foreignKey: { table: string, column: string } }[]) => {
         try {
-            // Convertendo os objetos de colunas em um formato adequado para SQL
-            const columnsSQL = columns.map(col => `${col.name} ${col.type}`).join(", ");
+            const columnDefinitions = columns.map(col => {
+                let definition = `${col.name} ${col.type}`;
+                if (col.primaryKey) definition += " PRIMARY KEY";
+                if (col.foreignKey.table) definition += ` REFERENCES ${col.foreignKey.table}(${col.foreignKey.column})`;
+                return definition;
+            }).join(", ");
 
-            const response = await api.post('/create-table', {
+            const response = await api.post("/create-table", {
                 dbName,
                 tableName,
-                columns: columnsSQL,
+                columns: columnDefinitions,
             });
+            console.log("Tabela criada com sucesso:", response.data);
 
             return response.data;
         } catch (error) {
-            console.error('Erro ao criar tabela:', error);
+            console.error("Erro ao criar tabela:", error);
             throw error;
         }
     };
 
-    return { getTables, createTable };
+
+    // Obtém os dados de uma tabela (SELECT)
+    const getTableData = async (dbName: string, tableName: string) => {
+        try {
+            const response = await api.get(`/list-records?dbName=${dbName}&tableName=${tableName}`);
+            return response.data;
+        } catch (error) {
+            console.error("Erro ao buscar dados da tabela:", error);
+            return [];
+        }
+    };
+
+    // Obtém a estrutura das colunas de uma tabela (DESCRIBE)
+    const getTableColumns = async (dbName: string, tableName: string) => {
+        try {
+            const response = await api.get(`/show-columns?dbName=${dbName}&tableName=${tableName}`);
+            return response.data;
+        } catch (error) {
+            console.error("Erro ao buscar colunas da tabela:", error);
+            return [];
+        }
+    };
+
+    // Insere um registro na tabela (INSERT)
+    const insertRecord = async (dbName: string, tableName: string, data: { columns: unknown[]; values: unknown[] }) => {
+        try {
+            const { columns, values } = data;
+
+            return await api.post("/insert-record", {
+                dbName,
+                tableName,
+                columns,
+                values,
+            });
+
+        } catch (error) {
+            console.error("Erro ao inserir registro:", error);
+            throw error;
+        }
+    };
+
+
+    return { getTables, createTable, getTableData, getTableColumns, insertRecord };
 }
 
 export default useTable;
